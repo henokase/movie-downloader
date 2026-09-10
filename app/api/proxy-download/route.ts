@@ -34,20 +34,27 @@ export async function GET(req: Request) {
 
   let res: Response;
   try {
-    res = await fetch(upstream.toString(), {
-      headers: {
-        Referer: "https://vidvault.ru/",
-        Origin: "https://vidvault.ru",
-      },
-    });
+    const upstreamHeaders: Record<string, string> = {
+      Referer: "https://vidvault.ru/",
+      Origin: "https://vidvault.ru",
+    };
+    // Forward range requests so large files support resume/seek.
+    const range = req.headers.get("range");
+    if (range) upstreamHeaders.Range = range;
+    res = await fetch(upstream.toString(), { headers: upstreamHeaders });
   } catch {
     return NextResponse.json({ error: "Upstream unreachable" }, { status: 502 });
   }
 
   if (!res.ok || !res.body) {
+    const expired = res.status === 403 || res.status === 429;
     return NextResponse.json(
-      { error: `Upstream responded ${res.status}` },
-      { status: res.status === 404 ? 404 : 502 },
+      {
+        error: expired
+          ? "File link rejected by upstream (likely expired) — try again later"
+          : `Upstream responded ${res.status}`,
+      },
+      { status: 502 },
     );
   }
 
@@ -62,6 +69,8 @@ export async function GET(req: Request) {
   );
   const len = res.headers.get("Content-Length");
   if (len) headers.set("Content-Length", len);
+  const range = res.headers.get("Content-Range");
+  if (range) headers.set("Content-Range", range);
 
-  return new Response(res.body, { status: 200, headers });
+  return new Response(res.body, { status: res.status, headers });
 }
