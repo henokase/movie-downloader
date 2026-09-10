@@ -3,9 +3,12 @@
 "use client";
 
 const API = "https://vidvault.ru/api";
-// VidVault renders downloads through these workers.
-const DL_PROXY = "https://dl.gemlelispe.workers.dev";
-const SUB_PROXY = "https://sub.k5s7sjozpn.workers.dev";
+
+// All file downloads go through our local proxy route, which adds
+// `Referer: https://vidvault.ru` — their workers reject direct
+// browser requests without it.
+const viaProxy = (upstreamUrl: string, filename: string) =>
+  `/api/proxy-download?url=${encodeURIComponent(upstreamUrl)}&name=${encodeURIComponent(filename)}`;
 
 export interface DlFile {
   resolution: string | null;
@@ -111,12 +114,13 @@ export async function getLinks(
     for (const d of info.downloads) {
       if (!d?.size || (!d?.url && !d?.vipLocked)) continue;
       const group = videos["MP4"] ?? (videos["MP4"] = []);
+      const res = d.resolution != null ? String(d.resolution) : null;
       group.push({
-        resolution: d.resolution != null ? String(d.resolution) : null,
+        resolution: res,
         format: "MP4",
         size: fmtSize(Number(d.size)),
         url: d.url
-          ? `${DL_PROXY}/${encodeURIComponent(d.url)}?n=${encodeURIComponent(label)}`
+          ? viaProxy(d.url, `${label} - ${res ?? "video"}p.mp4`)
           : "",
         locked: d.vipLocked === true || !d.url,
       });
@@ -129,7 +133,7 @@ export async function getLinks(
       subtitles.push({
         lanName: c.lanName,
         size: fmtSize(Number(c.size)),
-        url: `${SUB_PROXY}/?url=${encodeURIComponent(c.url)}&title=${encodeURIComponent(label)}`,
+        url: viaProxy(c.url, `${label} - ${c.lanName}.srt`),
       });
     }
   }
@@ -143,7 +147,7 @@ export async function getLinks(
       resolution: "480",
       format: "MKV",
       size: typeof s === "number" ? fmtSize(s) : String(s ?? "Unknown"),
-      url: mkvFiles[0].url as string,
+      url: viaProxy(mkvFiles[0].url as string, `${label} - 480p.mkv`),
     });
   }
 
