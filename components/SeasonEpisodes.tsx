@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import DownloadButton from "@/components/DownloadButton";
-import { poster, type Episode, type SeasonSummary } from "@/lib/tmdb";
+import { poster, type Episode, type SeasonSummary } from "@/lib/tmdb-types";
 
 export default function SeasonEpisodes({
   tvId,

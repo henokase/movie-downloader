@@ -5,7 +5,6 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -26,16 +25,16 @@ const Ctx = createContext<{
 }>({ settings: DEFAULTS, set: () => {} });
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS);
-
-  useEffect(() => {
+  // Lazy initializer reads localStorage once — no effect needed.
+  const [settings, setSettings] = useState<Settings>(() => {
+    if (typeof window === "undefined") return DEFAULTS;
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) setSettings({ ...DEFAULTS, ...JSON.parse(raw) });
+      return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
     } catch {
-      /* keep defaults */
+      return DEFAULTS;
     }
-  }, []);
+  });
 
   const set = (patch: Partial<Settings>) =>
     setSettings((prev) => {

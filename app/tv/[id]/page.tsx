@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import SeasonEpisodes from "@/components/SeasonEpisodes";
-import { getSeason, getTv, poster } from "@/lib/tmdb";
+import { getSeason, getTv } from "@/lib/tmdb";
+import { poster } from "@/lib/tmdb-types";
 
 export default async function TvPage(props: PageProps<"/tv/[id]">) {
   const { id } = await props.params;

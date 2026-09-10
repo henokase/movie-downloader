@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import MediaCard from "@/components/MediaCard";
-import type { MovieResult, TvResult } from "@/lib/tmdb";
+import type { MovieResult, TvResult } from "@/lib/tmdb-types";
 
 export default function ResultsTabs({
   movies,

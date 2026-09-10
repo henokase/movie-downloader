@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import DownloadButton from "@/components/DownloadButton";
-import { getMovie, poster } from "@/lib/tmdb";
+import { getMovie } from "@/lib/tmdb";
+import { poster } from "@/lib/tmdb-types";
 
 export default async function MoviePage(props: PageProps<"/movie/[id]">) {
   const { id } = await props.params;

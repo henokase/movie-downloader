@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { poster } from "@/lib/tmdb";
+import { poster } from "@/lib/tmdb-types";
 
 export default function MediaCard({
   id,
