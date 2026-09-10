@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getLinks, type LinksResult } from "@/lib/download";
+import { getLinks, redirectUrl, type LinksResult } from "@/lib/download";
 
 export default function DownloadModal({
   type,
@@ -95,7 +95,28 @@ export default function DownloadModal({
             )}
 
             {Object.keys(state.data.videos).length === 0 && (
-              <p className="text-sm text-zinc-400">No video files available.</p>
+              <div className="flex flex-col gap-2 rounded-lg border border-zinc-700 bg-zinc-800/50 p-3 text-sm">
+                {!state.data.known ? (
+                  <p className="text-zinc-300">
+                    This title/season isn&apos;t in the download library
+                    yet. Common for very recent episodes and sub-only
+                    anime — the library lags behind air dates.
+                  </p>
+                ) : (
+                  <p className="text-zinc-300">
+                    No video files available right now. Links may be
+                    expired — try again later.
+                  </p>
+                )}
+                <a
+                  href={redirectUrl(type, tmdbId, season, episode)}
+                  target="_blank"
+                  rel="noopener"
+                  className="text-zinc-200 underline hover:text-white"
+                >
+                  Open the download page anyway ↗
+                </a>
+              </div>
             )}
             {Object.entries(state.data.videos).map(([format, files]) => (
               <section key={format}>
@@ -110,6 +131,7 @@ export default function DownloadModal({
                     >
                       <span>
                         {f.resolution ? `${f.resolution}p` : format} · {f.size}
+                        {f.note ? ` · ${f.note}` : ""}
                       </span>
                       {f.locked ? (
                         <span className="rounded bg-zinc-700 px-3 py-1 text-xs text-zinc-400">

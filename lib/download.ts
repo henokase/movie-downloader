@@ -16,6 +16,7 @@ export interface DlFile {
   size: string;
   url: string;
   locked?: boolean;
+  note?: string;
 }
 
 export interface SubFile {
@@ -29,6 +30,9 @@ export interface LinksResult {
   subtitles: SubFile[];
   limited: boolean;
   freeNum: number | null;
+  // False when the backend has no record of this title/season at all
+  // (all data blocks null) — common for very recent episodes.
+  known: boolean;
 }
 
 export function redirectUrl(
@@ -151,10 +155,49 @@ export async function getLinks(
     });
   }
 
+  // mkvV2Data: alternate MKV source. Observed shapes: a single
+  // {url, size, quality, language, ...}, a list of those, or {files:[...]}.
+  // Size here is already a string like "280.54 MB".
+  const pushMkvV2 = (f: {
+    url?: unknown;
+    size?: unknown;
+    quality?: unknown;
+    language?: unknown;
+  }) => {
+    if (!f || typeof f.url !== "string" || !f.url) return;
+    const group = videos["MKV"] ?? (videos["MKV"] = []);
+    const q =
+      typeof f.quality === "string" ? f.quality.replace(/p$/i, "") : null;
+    group.push({
+      resolution: q,
+      format: "MKV",
+      size: typeof f.size === "number" ? fmtSize(f.size) : String(f.size ?? "Unknown"),
+      url: viaProxy(
+        f.url,
+        `${label} - ${q ?? "video"}p${typeof f.language === "string" && f.language ? ` [${f.language}]` : ""}.mkv`,
+      ),
+      note: typeof f.language === "string" && f.language ? f.language : undefined,
+    });
+  };
+  const v2 = data?.mkvV2Data;
+  if (Array.isArray(v2)) {
+    for (const f of v2) pushMkvV2(f);
+  } else if (v2 && typeof v2 === "object") {
+    if (Array.isArray(v2.files)) {
+      for (const f of v2.files) pushMkvV2(f);
+    } else {
+      pushMkvV2(v2);
+    }
+  }
+
+  const known =
+    data?.mp4Data != null || data?.mkvData != null || data?.mkvV2Data != null;
+
   return {
     videos,
     subtitles,
     limited: info?.limited === true,
     freeNum: typeof info?.freeNum === "number" ? info.freeNum : null,
+    known,
   };
 }
