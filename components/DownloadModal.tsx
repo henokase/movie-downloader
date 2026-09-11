@@ -11,7 +11,6 @@ import {
   DownloadIcon,
   ExternalIcon,
   FilmIcon,
-  LockIcon,
   RefreshIcon,
 } from "@/components/icons";
 
@@ -161,6 +160,13 @@ export default function DownloadModal({
 }
 function ModalBody({ data, fallback }: { data: LinksResult; fallback: string }) {
   const formats = Object.entries(data.videos);
+  
+  const unlocked = formats
+    .map(
+      ([format, files]) =>
+        [format, files.filter((f) => !f.locked)] as const,
+    )
+    .filter(([, files]) => files.length > 0);
   return (
     <div className="flex flex-col gap-5">
       {data.limited && (
@@ -213,7 +219,25 @@ function ModalBody({ data, fallback }: { data: LinksResult; fallback: string }) 
         </div>
       )}
 
-      {formats.map(([format, files]) => (
+      {formats.length > 0 && unlocked.length === 0 && (
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm">
+          <p className="leading-relaxed text-zinc-300">
+            Only VIP-locked qualities are listed for direct download. The
+            redirect page may still offer them within the free quota.
+          </p>
+          <a
+            href={fallback}
+            target="_blank"
+            rel="noopener"
+            className="mt-3 inline-flex items-center gap-1.5 font-semibold text-amber-300 hover:text-amber-200"
+          >
+            Open the download page
+            <ExternalIcon className="h-4 w-4" />
+          </a>
+        </div>
+      )}
+
+      {unlocked.map(([format, files]) => (
         <section key={format}>
           <h3 className="mb-2.5 flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.1em] text-zinc-400">
             <FilmIcon className="h-4 w-4" />
@@ -239,20 +263,13 @@ function ModalBody({ data, fallback }: { data: LinksResult; fallback: string }) 
                     </p>
                   </div>
                 </div>
-                {f.locked ? (
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-zinc-800 px-3.5 py-2 text-xs font-semibold text-zinc-500">
-                    <LockIcon className="h-3.5 w-3.5" />
-                    VIP
-                  </span>
-                ) : (
-                  <a
-                    href={f.url}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-[13px] font-bold text-zinc-950 transition-colors hover:bg-amber-300"
-                  >
-                    <DownloadIcon className="h-4 w-4" />
-                    Get
-                  </a>
-                )}
+                <a
+                  href={f.url}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-[13px] font-bold text-zinc-950 transition-colors hover:bg-amber-300"
+                >
+                  <DownloadIcon className="h-4 w-4" />
+                  Get
+                </a>
               </li>
             ))}
           </ul>
