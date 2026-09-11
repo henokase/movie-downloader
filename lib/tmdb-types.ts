@@ -55,6 +55,7 @@ export interface MovieDetails extends MovieResult {
   runtime?: number;
   genres: { id: number; name: string }[];
   credits?: Credits;
+  videos?: Videos;
 }
 
 export interface TvDetails extends TvResult {
@@ -62,6 +63,33 @@ export interface TvDetails extends TvResult {
   genres: { id: number; name: string }[];
   seasons: SeasonSummary[];
   credits?: Credits;
+  videos?: Videos;
+}
+
+// append_to_response=videos — YouTube keys for the trailer page.
+export interface VideoEntry {
+  key: string;
+  site: string;
+  type: string;
+  official: boolean;
+  name: string;
+}
+
+export interface Videos {
+  results: VideoEntry[];
+}
+
+// Best playable trailer: official YouTube trailer first, then any
+// trailer, teaser, and finally any other YouTube video.
+export function bestTrailerKey(videos?: Videos): string | null {
+  const yt = (videos?.results ?? []).filter((v) => v.site === "YouTube");
+  if (yt.length === 0) return null;
+  return (
+    yt.find((v) => v.type === "Trailer" && v.official)?.key ??
+    yt.find((v) => v.type === "Trailer")?.key ??
+    yt.find((v) => v.type === "Teaser")?.key ??
+    yt[0].key
+  );
 }
 
 export const poster = (p: string | null, size = "w500") =>

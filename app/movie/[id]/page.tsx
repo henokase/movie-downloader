@@ -4,7 +4,7 @@ import DetailHero from "@/components/DetailHero";
 import CastList from "@/components/CastList";
 import RelatedRow from "@/components/RelatedRow";
 import { getMovie } from "@/lib/tmdb";
-import { poster } from "@/lib/tmdb-types";
+import { bestTrailerKey, poster } from "@/lib/tmdb-types";
 
 export default async function MoviePage(props: PageProps<"/movie/[id]">) {
   const { id } = await props.params;
@@ -17,6 +17,7 @@ export default async function MoviePage(props: PageProps<"/movie/[id]">) {
   }
 
   const year = m.release_date?.slice(0, 4) ?? "—";
+  const trailerKey = bestTrailerKey(m.videos);
 
   return (
     <div className="flex flex-col gap-10 pb-4 pt-2">
@@ -30,6 +31,7 @@ export default async function MoviePage(props: PageProps<"/movie/[id]">) {
         meta={m.runtime ? [`${m.runtime} min`] : []}
         genres={m.genres.map((g) => g.name)}
         overview={m.overview}
+        trailerHref={trailerKey ? `/trailer/movie/${m.id}` : null}
         actions={
           <DownloadButton
             type="movie"

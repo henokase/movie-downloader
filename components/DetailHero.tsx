@@ -1,6 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
-import { CalendarIcon, ClockIcon, StarIcon } from "@/components/icons";
+import { CalendarIcon, ClockIcon, PlayIcon, StarIcon } from "@/components/icons";
 
 // Shared cinematic header for the movie and TV detail pages.
 export default function DetailHero({
@@ -14,6 +15,7 @@ export default function DetailHero({
   overview,
   actions,
   eyebrow,
+  trailerHref,
 }: {
   backdrop: string | null;
   posterSrc: string | null;
@@ -25,6 +27,7 @@ export default function DetailHero({
   overview: string;
   actions: ReactNode;
   eyebrow: string;
+  trailerHref?: string | null;
 }) {
   return (
     <div>
@@ -114,7 +117,20 @@ export default function DetailHero({
             {overview || "No overview available."}
           </p>
 
-          <div className="flex flex-wrap items-center gap-3">{actions}</div>
+          <div className="flex flex-wrap items-center gap-3">
+            {actions}
+            {trailerHref && (
+              <Link
+                href={trailerHref}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-6 py-3 text-[15px] font-semibold text-zinc-100 backdrop-blur transition-colors hover:border-white/30 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              >
+                <PlayIcon className="h-5 w-5 text-amber-300" />
+                Trailer
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>

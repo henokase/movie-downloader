@@ -155,6 +155,13 @@ export const RefreshIcon = (p: P) =>
     p,
   );
 
+export const PlayIcon = (p: P) =>
+  base(
+    <path d="M8 5.5v13l11-6.5z" />,
+    p,
+    true,
+  );
+
 export const LogoIcon = ({ className = "h-6 w-6" }: P) => (
   <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
     <rect x="2" y="2" width="20" height="20" rx="6" fill="#fbbf24" />

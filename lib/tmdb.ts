@@ -56,13 +56,13 @@ export function searchTv(q: string) {
 
 // Metadata barely changes: cache details 24h, seasons 1h.
 export function getMovie(id: string) {
-  return get<MovieDetails>(`/movie/${id}?append_to_response=credits`, {
+  return get<MovieDetails>(`/movie/${id}?append_to_response=credits,videos`, {
     next: { revalidate: 86400 },
   });
 }
 
 export function getTv(id: string) {
-  return get<TvDetails>(`/tv/${id}?append_to_response=credits`, {
+  return get<TvDetails>(`/tv/${id}?append_to_response=credits,videos`, {
     next: { revalidate: 86400 },
   });
 }

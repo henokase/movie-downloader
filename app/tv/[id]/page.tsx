@@ -4,7 +4,7 @@ import DetailHero from "@/components/DetailHero";
 import CastList from "@/components/CastList";
 import RelatedRow from "@/components/RelatedRow";
 import { getSeason, getTv } from "@/lib/tmdb";
-import { poster } from "@/lib/tmdb-types";
+import { bestTrailerKey, poster } from "@/lib/tmdb-types";
 
 export default async function TvPage(props: PageProps<"/tv/[id]">) {
   const { id } = await props.params;
@@ -17,6 +17,7 @@ export default async function TvPage(props: PageProps<"/tv/[id]">) {
   }
 
   const year = show.first_air_date?.slice(0, 4) ?? "—";
+  const trailerKey = bestTrailerKey(show.videos);
   const firstSeason =
     show.seasons.find((s) => s.season_number > 0)?.season_number ?? 1;
 
@@ -41,6 +42,7 @@ export default async function TvPage(props: PageProps<"/tv/[id]">) {
         meta={[seasonLabel]}
         genres={show.genres.map((g) => g.name)}
         overview={show.overview}
+        trailerHref={trailerKey ? `/trailer/tv/${show.id}` : null}
         actions={null}
       />
       {show.credits && <CastList cast={show.credits.cast} />}
