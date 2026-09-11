@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import MediaCard from "@/components/MediaCard";
+import EmptyState from "@/components/EmptyState";
+import { FilmIcon, TvIcon } from "@/components/icons";
 import type { MovieResult, TvResult } from "@/lib/tmdb-types";
 
 export default function ResultsTabs({
@@ -15,27 +17,55 @@ export default function ResultsTabs({
     movies.length === 0 && tv.length > 0 ? "tv" : "movie",
   );
 
-  const btn = (active: boolean) =>
-    `rounded-lg px-4 py-2 text-sm font-medium ${
-      active ? "bg-white text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-    }`;
+  const tabs = [
+    { key: "movie", label: "Movies", count: movies.length, icon: <FilmIcon className="h-4 w-4" /> },
+    { key: "tv", label: "TV Shows", count: tv.length, icon: <TvIcon className="h-4 w-4" /> },
+  ] as const;
 
   return (
     <div>
-      <div className="mb-4 flex gap-2">
-        <button onClick={() => setTab("movie")} className={btn(tab === "movie")}>
-          Movies ({movies.length})
-        </button>
-        <button onClick={() => setTab("tv")} className={btn(tab === "tv")}>
-          TV Shows ({tv.length})
-        </button>
+      <div
+        role="tablist"
+        aria-label="Result types"
+        className="mb-5 inline-flex rounded-2xl border border-zinc-800 bg-zinc-900/70 p-1"
+      >
+        {tabs.map((t) => {
+          const active = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setTab(t.key)}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                active
+                  ? "bg-amber-400 text-zinc-950"
+                  : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+              }`}
+            >
+              {t.icon}
+              {t.label}
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                  active ? "bg-zinc-950/15" : "bg-zinc-800 text-zinc-400"
+                }`}
+              >
+                {t.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {tab === "movie" ? (
         movies.length === 0 ? (
-          <p className="text-sm text-zinc-400">No movies found.</p>
+          <EmptyState
+            icon={<FilmIcon />}
+            title="No movies found"
+            hint="Try a different spelling, the original-language title, or fewer words."
+          />
         ) : (
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
             {movies.map((m) => (
               <MediaCard
                 key={m.id}
@@ -50,9 +80,13 @@ export default function ResultsTabs({
           </div>
         )
       ) : tv.length === 0 ? (
-        <p className="text-sm text-zinc-400">No TV shows found.</p>
+        <EmptyState
+          icon={<TvIcon />}
+          title="No TV shows found"
+          hint="Try a different spelling, the original-language title, or fewer words."
+        />
       ) : (
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
           {tv.map((s) => (
             <MediaCard
               key={s.id}

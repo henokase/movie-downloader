@@ -43,7 +43,12 @@ export interface Episode {
 }
 
 export interface Credits {
-  cast: { id: number; name: string; character: string }[];
+  cast: {
+    id: number;
+    name: string;
+    character: string;
+    profile_path: string | null;
+  }[];
 }
 
 export interface MovieDetails extends MovieResult {
@@ -61,3 +66,35 @@ export interface TvDetails extends TvResult {
 
 export const poster = (p: string | null, size = "w500") =>
   p ? `https://image.tmdb.org/t/p/${size}${p}` : null;
+
+// GET /person/{id} — profile header for the person page.
+export interface PersonDetails {
+  id: number;
+  name: string;
+  biography: string;
+  birthday: string | null;
+  deathday: string | null;
+  place_of_birth: string | null;
+  profile_path: string | null;
+  known_for_department: string;
+}
+
+// GET /person/{id}/combined_credits — full acting filmography in one call.
+// Each entry declares its own media_type ("movie" or "tv").
+export interface PersonCredit {
+  id: number;
+  media_type: "movie" | "tv";
+  title?: string;
+  name?: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  vote_average: number;
+  overview: string;
+  release_date?: string;
+  first_air_date?: string;
+  character?: string;
+}
+
+export interface CombinedCredits {
+  cast: PersonCredit[];
+}

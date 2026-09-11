@@ -6,26 +6,31 @@ export const dynamic = "force-dynamic";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // File hosts rate-limit per IP (HTTP 429) and sometimes stall excess
-// requests instead of answering. Bound each attempt with a timeout and
-// retry a couple of times with backoff before giving up — a retry often
-// lands after the limit window instead of failing outright.
+// requests instead of answering. Bound the time to first byte and retry a
+// couple of times with backoff before giving up — a retry often lands after
+// the limit window instead of failing outright. The timeout is cleared as
+// soon as response headers arrive, so long downloads can stream for as long
+// as they need (an un-cleared fetch timeout would abort healthy streams
+// mid-download — exactly the "failed to pipe response" 500 after ~25s).
 // Throws an Error with `upstreamStatus === 429` when the host kept
 // rate-limiting us, so the caller can say so honestly.
 async function fetchWithRetry(url: string, headers: Record<string, string>) {
   let lastStatus = 0;
   for (let attempt = 0; attempt <= 2; attempt++) {
     if (attempt > 0) await sleep(2000 * attempt);
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
     try {
-      const res = await fetch(url, {
-        headers,
-        signal: AbortSignal.timeout(25000),
-      });
+      const res = await fetch(url, { headers, signal: ctrl.signal });
       if (res.status !== 429) return res;
       await res.body?.cancel().catch(() => {});
       lastStatus = 429;
     } catch {
-      // Timeout or connection error — retry while attempts remain.
+      // Timeout before first byte, or connection error — retry while
+      // attempts remain.
       lastStatus = -1;
+    } finally {
+      clearTimeout(timer);
     }
   }
   const e = new Error(

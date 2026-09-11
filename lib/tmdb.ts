@@ -3,14 +3,24 @@
 import "server-only";
 
 import type {
+  CombinedCredits,
   MovieDetails,
   MovieResult,
   Paged,
+  PersonDetails,
   TvDetails,
   TvResult,
 } from "@/lib/tmdb-types";
 
-export type { MovieDetails, MovieResult, Paged, TvDetails, TvResult };
+export type {
+  CombinedCredits,
+  MovieDetails,
+  MovieResult,
+  Paged,
+  PersonDetails,
+  TvDetails,
+  TvResult,
+};
 
 const BASE = process.env.TMDB_BASE ?? "https://api.themoviedb.org/3";
 
@@ -74,4 +84,40 @@ export function trendingTv() {
   return get<Paged<TvResult>>("/trending/tv/week", {
     next: { revalidate: 21600 },
   });
+}
+
+// Person profile + full acting filmography (movies and TV in one call).
+export function getPerson(id: string) {
+  return get<PersonDetails>(`/person/${id}`, {
+    next: { revalidate: 86400 },
+  });
+}
+
+export function getPersonCredits(id: string) {
+  return get<CombinedCredits>(`/person/${id}/combined_credits`, {
+    next: { revalidate: 86400 },
+  });
+}
+
+// "More like this": recommendations first, similar as fallback.
+export async function getRelatedMovie(id: string) {
+  const rec = await get<Paged<MovieResult>>(`/movie/${id}/recommendations`, {
+    next: { revalidate: 86400 },
+  });
+  if (rec.results.length > 0) return rec.results;
+  const sim = await get<Paged<MovieResult>>(`/movie/${id}/similar`, {
+    next: { revalidate: 86400 },
+  });
+  return sim.results;
+}
+
+export async function getRelatedTv(id: string) {
+  const rec = await get<Paged<TvResult>>(`/tv/${id}/recommendations`, {
+    next: { revalidate: 86400 },
+  });
+  if (rec.results.length > 0) return rec.results;
+  const sim = await get<Paged<TvResult>>(`/tv/${id}/similar`, {
+    next: { revalidate: 86400 },
+  });
+  return sim.results;
 }
