@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { SettingsProvider } from "@/lib/settings";
-import { LogoIcon, SearchIcon, SettingsIcon } from "@/components/icons";
+import { LogoIcon, SettingsIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: {
@@ -23,15 +23,6 @@ function Header() {
             Flick<span className="text-amber-400">Fetch</span>
           </span>
         </Link>
-        <div className="ml-6 hidden items-center gap-1 sm:flex">
-          <Link
-            href="/"
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100"
-          >
-            <SearchIcon className="h-4 w-4" />
-            Browse
-          </Link>
-        </div>
         <Link
           href="/settings"
           aria-label="Settings"

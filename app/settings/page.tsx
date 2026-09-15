@@ -79,18 +79,18 @@ export default function SettingsPage() {
     icon: React.ReactNode;
   }[] = [
     {
-      key: "redirect",
-      title: "Open download page",
-      badge: "Recommended",
-      desc: "Opens the provider's download page in your browser. Simplest and most reliable — pick quality and subtitles there.",
-      icon: <ExternalIcon className="h-5 w-5" />,
-    },
-    {
       key: "direct",
       title: "Show links in this app",
-      badge: "Advanced",
-      desc: "Fetches MP4, MKV and subtitle links into a popup here. Same quota and expiry rules apply; some hosts throttle direct fetches.",
+      badge: "Recommended",
+      desc: "Fetches MKV files and subtitles into a popup here. If no MKV is listed you are taken to the provider page instead.",
       icon: <DownloadIcon className="h-5 w-5" />,
+    },
+    {
+      key: "redirect",
+      title: "Open download page",
+      badge: "Fallback",
+      desc: "Opens the provider's download page in your browser. Pick quality and subtitles there.",
+      icon: <ExternalIcon className="h-5 w-5" />,
     },
   ];
 

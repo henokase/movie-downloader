@@ -16,6 +16,7 @@ import {
 
 type State =
   | { kind: "loading" }
+  | { kind: "redirecting" }
   | { kind: "error"; message: string }
   | { kind: "done"; data: LinksResult };
 
@@ -43,7 +44,19 @@ export default function DownloadModal({
     let cancelled = false;
     getLinks(type, tmdbId, title, year, season, episode).then(
       (data) => {
-        if (!cancelled) setState({ kind: "done", data });
+        if (cancelled) return;
+        const mkvCount = (data.videos["MKV"] ?? []).filter(
+          (f) => !f.locked,
+        ).length;
+        if (mkvCount === 0) {
+          // No working direct files — skip the empty modal and go straight
+          // to the provider page. Same-tab navigation on purpose: a
+          // window.open from this async callback would be popup-blocked.
+          setState({ kind: "redirecting" });
+          window.location.href = redirectUrl(type, tmdbId, season, episode);
+          return;
+        }
+        setState({ kind: "done", data });
       },
       (e: unknown) => {
         if (cancelled) return;
@@ -123,6 +136,17 @@ export default function DownloadModal({
         <div className="mt-4">
           {state.kind === "loading" && <ModalLinksSkeleton />}
 
+          {state.kind === "redirecting" && (
+            <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-8 text-center">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.06] text-amber-300">
+                <ExternalIcon className="h-5 w-5" />
+              </span>
+              <p className="text-sm font-medium text-zinc-200">
+                No MKV files available — opening the download page…
+              </p>
+            </div>
+          )}
+
           {state.kind === "error" && (
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-red-900/60 bg-red-950/40 px-6 py-8 text-center">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-900/60 text-red-300">
@@ -159,14 +183,12 @@ export default function DownloadModal({
   );
 }
 function ModalBody({ data, fallback }: { data: LinksResult; fallback: string }) {
-  const formats = Object.entries(data.videos);
-  
-  const unlocked = formats
-    .map(
-      ([format, files]) =>
-        [format, files.filter((f) => !f.locked)] as const,
-    )
-    .filter(([, files]) => files.length > 0);
+  // MKV-only: the MP4 file host throttles this network (HTTP 429), so MP4
+  // rows are hidden instead of teasing dead options — the single MKV
+  // section below renders only when it has files, with no division titles
+  // for empty groups. The parent auto-redirects when MKV is empty, so no
+  // empty-state is reachable here.
+  const mkv = (data.videos["MKV"] ?? []).filter((f) => !f.locked);
   return (
     <div className="flex flex-col gap-5">
       {data.limited && (
@@ -194,64 +216,21 @@ function ModalBody({ data, fallback }: { data: LinksResult; fallback: string }) 
         </p>
       )}
 
-      {formats.length === 0 && (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm">
-          {!data.known ? (
-            <p className="leading-relaxed text-zinc-300">
-              This title isn&apos;t in the download library yet — common for
-              very recent releases. It usually appears within a day or two.
-            </p>
-          ) : (
-            <p className="leading-relaxed text-zinc-300">
-              No video files available right now. Links may have expired — try
-              again in a bit.
-            </p>
-          )}
-          <a
-            href={fallback}
-            target="_blank"
-            rel="noopener"
-            className="mt-3 inline-flex items-center gap-1.5 font-semibold text-amber-300 hover:text-amber-200"
-          >
-            Open the download page anyway
-            <ExternalIcon className="h-4 w-4" />
-          </a>
-        </div>
-      )}
-
-      {formats.length > 0 && unlocked.length === 0 && (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm">
-          <p className="leading-relaxed text-zinc-300">
-            Only VIP-locked qualities are listed for direct download. The
-            redirect page may still offer them within the free quota.
-          </p>
-          <a
-            href={fallback}
-            target="_blank"
-            rel="noopener"
-            className="mt-3 inline-flex items-center gap-1.5 font-semibold text-amber-300 hover:text-amber-200"
-          >
-            Open the download page
-            <ExternalIcon className="h-4 w-4" />
-          </a>
-        </div>
-      )}
-
-      {unlocked.map(([format, files]) => (
-        <section key={format}>
+      {mkv.length > 0 && (
+        <section>
           <h3 className="mb-2.5 flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.1em] text-zinc-400">
             <FilmIcon className="h-4 w-4" />
-            {format === "MKV" ? "MKV · subtitles included" : "MP4"}
+            MKV · subtitles included
           </h3>
           <ul className="flex flex-col gap-2">
-            {files.map((f, i) => (
+            {mkv.map((f, i) => (
               <li
                 key={i}
                 className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
               >
           <div className="flex min-w-0 flex-1 items-center gap-3">
                   <span className="shrink-0 rounded-lg bg-amber-400/15 px-2.5 py-1 text-xs font-bold text-amber-300">
-                    {f.resolution ? `${f.resolution}p` : format}
+                    {f.resolution ? `${f.resolution}p` : "MKV"}
                   </span>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-zinc-100">
@@ -259,7 +238,7 @@ function ModalBody({ data, fallback }: { data: LinksResult; fallback: string }) 
                       {f.note ? ` · ${f.note}` : ""}
                     </p>
                     <p className="text-xs text-zinc-500">
-                      {format === "MKV" ? "Matroska" : "H.264"} · direct file
+                      Matroska · direct file
                     </p>
                   </div>
                 </div>
@@ -274,7 +253,7 @@ function ModalBody({ data, fallback }: { data: LinksResult; fallback: string }) 
             ))}
           </ul>
         </section>
-      ))}
+      )}
 
       {data.subtitles.length > 0 && (
         <section>

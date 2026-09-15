@@ -16,8 +16,10 @@ export interface Settings {
   openInNewTab: boolean;
 }
 
-const DEFAULTS: Settings = { downloadMode: "redirect", openInNewTab: true };
-const KEY = "md-settings";
+const DEFAULTS: Settings = { downloadMode: "direct", openInNewTab: true };
+// Bumped so the old stored "redirect" default doesn't stick around —
+// existing browsers pick up the new direct default once.
+const KEY = "md-settings-v2";
 
 const Ctx = createContext<{
   settings: Settings;
