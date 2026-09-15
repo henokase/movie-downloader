@@ -80,9 +80,9 @@ export default async function Home() {
         />
       ) : (
         <>
-          <Rail title="Trending movies">
+           <Rail title="Trending movies">
             {(movies?.results ?? []).slice(0, 10).map((m) => (
-              <div key={m.id} className="w-32 shrink-0 snap-start sm:w-40">
+              <div key={m.id} className="w-32 shrink-0 sm:w-40">
                 <MediaCard
                   id={m.id}
                   kind="movie"
@@ -96,7 +96,7 @@ export default async function Home() {
           </Rail>
           <Rail title="Trending TV shows">
             {(tv?.results ?? []).slice(0, 10).map((s) => (
-              <div key={s.id} className="w-32 shrink-0 snap-start sm:w-40">
+              <div key={s.id} className="w-32 shrink-0 sm:w-40">
                 <MediaCard
                   id={s.id}
                   kind="tv"

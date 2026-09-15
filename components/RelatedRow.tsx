@@ -28,7 +28,7 @@ export default async function RelatedRow({
     <Rail title={title}>
       {kind === "movie"
         ? (items as MovieResult[]).map((m) => (
-            <div key={m.id} className="w-32 shrink-0 snap-start sm:w-40">
+            <div key={m.id} className="w-32 shrink-0 sm:w-40">
               <MediaCard
                 id={m.id}
                 kind="movie"
@@ -40,7 +40,7 @@ export default async function RelatedRow({
             </div>
           ))
         : (items as TvResult[]).map((s) => (
-            <div key={s.id} className="w-32 shrink-0 snap-start sm:w-40">
+            <div key={s.id} className="w-32 shrink-0 sm:w-40">
               <MediaCard
                 id={s.id}
                 kind="tv"

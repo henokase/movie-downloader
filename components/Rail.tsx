@@ -47,7 +47,7 @@ export default function Rail({
       </div>
       <div
         ref={ref}
-        className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-1 sm:gap-4"
+        className="no-scrollbar flex gap-3 overflow-x-auto sm:gap-4"
       >
         {children}
       </div>

@@ -23,7 +23,7 @@ export default function MediaCard({
   return (
     <Link
       href={`/${kind}/${id}`}
-      className="group overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 transition-all duration-300 hover:-translate-y-1 hover:border-zinc-600 hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+      className="group overflow-hidden rounded-xl bg-zinc-900/60 ring-1 ring-white/[0.08] transition-all duration-300 hover:-translate-y-1 hover:ring-white/15 hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-zinc-800/60">
         {src ? (

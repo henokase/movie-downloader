@@ -20,7 +20,7 @@ export default function CastList({
       <h2 className="mb-4 text-lg font-bold tracking-tight text-zinc-100">
         Top cast
       </h2>
-      <div className="no-scrollbar -mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-1">
+      <div className="no-scrollbar -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
         {cast.slice(0, 12).map((c) => {
           const initials = c.name
             .split(" ")
@@ -33,7 +33,7 @@ export default function CastList({
             <Link
               key={c.id}
               href={`/person/${c.id}`}
-              className="group flex w-36 shrink-0 snap-start flex-col items-center gap-2.5 rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="group flex w-36 shrink-0 flex-col items-center gap-2.5 rounded-2xl bg-zinc-900/60 ring-1 ring-white/[0.08] transition-all duration-300 hover:-translate-y-0.5 hover:ring-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               <span className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-amber-400/25 to-zinc-700/40 text-base font-bold text-amber-200">
                 {src ? (
