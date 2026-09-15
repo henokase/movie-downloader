@@ -45,15 +45,11 @@ export default function Rail({
           </button>
         </div>
       </div>
-      <div className="relative">
-        <div
-          ref={ref}
-          className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-1 sm:gap-4"
-        >
-          {children}
-        </div>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#09090b] to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#09090b] to-transparent" />
+      <div
+        ref={ref}
+        className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-1 sm:gap-4"
+      >
+        {children}
       </div>
     </section>
   );
